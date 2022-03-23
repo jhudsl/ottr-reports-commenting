@@ -12,11 +12,20 @@ inputs:
   git_path:
     description: "What GitHub repository should this be run on?"
     default: ${GITHUB_REPOSITORY}
-    
+  gh_pat:
+    description: "A GitHub secret personal access token that is set in the current repo."
+    default: ${{ secrets.GH_PAT }}
+
 outputs:
-  random-number:
-    description: "Random number"
+  comments:
+    description: "Comments that have the check report information and links"
+  error_name:
+    description: "The name of the error that was run"
     value: ${{ steps.random-number-generator.outputs.random-id }}
+  report_path:
+    description: "The relative path to where the report was saved."
+  error_num:
+    description: "How many errors were found."
 
 runs:
   using: "composite"
@@ -39,6 +48,7 @@ runs:
 
     - name: Run the check
       uses: jhudsl/ottr-reports@main
+      id: check_results
       with:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
@@ -48,8 +58,8 @@ runs:
     - name: Commit check errors
       run: |
         branch_name='preview-${{ github.event.pull_request.number }}'
-        git add --force ${{ steps.declare.outputs.report_path }} || echo "No changes to commit"
-        git commit -m 'Add ${{ steps.declare.outputs.error_name }} check file' || echo "No changes to commit"
+        git add --force ${{ steps.chk_results.outputs.report_path }} || echo "No changes to commit"
+        git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
         git pull --set-upstream origin $branch_name --allow-unrelated-histories --strategy-option=ours
         git push --force origin $branch_name || echo "No changes to commit"
 
@@ -59,7 +69,7 @@ runs:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           branch_name='preview-${{ github.event.pull_request.number }}'
-          error_url=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/$branch_name/${{ steps.declare.outputs.report_path }}
+          error_url=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/$branch_name/${{ steps.chk_results.outputs.report_path }}
           echo ::set-output name=time::$(date +'%Y-%m-%d')
           echo ::set-output name=commit_id::$GITHUB_SHA
           echo ::set-output name=error_url::$error_url
@@ -71,32 +81,32 @@ runs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: ${{ steps.declare.outputs.error_name }}
+          body-includes: ${{ steps.chk_results.outputs.error_name }}
 
       - name: There are errors!
-        if: ${{ env.chk_results >= env.error_min }}
+        if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            :warning: ${{ steps.declare.outputs.error_name }} :warning:
-            There are ${{ steps.declare.outputs.error_name }} that need to be addressed. [Read this guide for more info](https://github.com/jhudsl/OTTR_Template/wiki/Spell-check).
+            :warning: ${{ steps.chk_results.outputs.error_name }} :warning:
+            There are ${{ steps.chk_results.outputs.error_name }} that need to be addressed. [Read this guide for more info](https://github.com/jhudsl/OTTR_Template/wiki/Most-common-errors-and-pitfalls#spell-checkurl-checkquiz-format-fail).
             [Download the errors here.](${{ steps.build-components.outputs.error_url }})
             _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
           edit-mode: replace
 
       - name: Check check results - fail if too many errors
-        if: ${{ env.chk_results >= env.error_min }}
+        if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
         run: exit 1
 
       - name: No errors
-        if: ${{ env.chk_results < env.error_min }}
+        if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            No ${{ steps.declare.outputs.error_name }}! :tada:
+            No ${{ steps.chk_results.outputs.error_name }}! :tada:
             _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
           edit-mode: replace
