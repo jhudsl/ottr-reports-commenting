@@ -1,44 +1,28 @@
-# Candace Savonen Mar 2022
 
-name: Testing ottr-reports
 on:
   pull_request:
     branches: [ main ]
 
 jobs:
-
-  spell-check:
+  test-commenting:
     runs-on: ubuntu-latest
+    name: Comment on error checks
     steps:
-    - name: Checkout Actions Repository
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: jhudsl/OTTR_Template
 
-    - name: Check spelling
-      uses: ./
-      with:
-        check_type: spelling
-        error_min: 3
+      - uses: jhudsl/error-reports-commenting@cansavvy/add-files
+        with:
+          check_type: spelling
+          error_min: 3
 
-  urls-check:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Actions Repository
-      uses: actions/checkout@v2
+      - uses: jhudsl/error-reports-commenting@cansavvy/add-files
+        with:
+          check_type: urls
+          error_min: 0
 
-    - name: Check URLs
-      uses: ./
-      with:
-        check_type: urls
-        error_min: 0
-
-  quiz-format:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Actions Repository
-      uses: actions/checkout@v2
-
-    - name: Check quiz formatting
-      uses: ./
-      with:
-        check_type: quiz_format
-        error_min: 0
+      - uses: jhudsl/error-reports-commenting@cansavvy/add-files
+        with:
+          check_type: quiz_format
+          error_min: 0
