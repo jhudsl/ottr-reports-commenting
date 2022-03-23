@@ -1,0 +1,28 @@
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-commenting:
+    runs-on: ubuntu-latest
+    name: Comment on error checks
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: jhudsl/OTTR_Template
+
+      - uses: jhudsl/error-reports-commenting@main
+        with:
+          check_type: spelling
+          error_min: 3
+
+      - uses: jhudsl/error-reports-commenting@main
+        with:
+          check_type: urls
+          error_min: 0
+
+      - uses: jhudsl/error-reports-commenting@main
+        with:
+          check_type: quiz_format
+          error_min: 0
