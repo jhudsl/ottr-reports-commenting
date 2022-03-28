@@ -1,11 +1,6 @@
 name: 'ottr-reports-commenting'
 description: 'Works with ottr-reports to display results of the reports on a pull request'
 inputs:
-  gh_pat:
-    description: "A GitHub secret personal access token that is set in the current repo."
-    default: ${{ secrets.GH_PAT }}
-    required: true
-    type: string
   check_type:
     description: "There are three types of reports that can be done and specified: 'spelling', 'urls', or 'quiz_format'."
     required: true
@@ -24,6 +19,12 @@ inputs:
     description: "What should the preview branch be called?"
     default: "preview-${{ github.event.pull_request.number }}"
     required: false
+    type: string
+secrets:
+  gh_pat:
+    description: "A GitHub secret personal access token that is set in the current repo."
+    default: ${{ secrets.GH_PAT }}
+    required: true
     type: string
 
 outputs:
@@ -45,6 +46,7 @@ runs:
       with:
         repository: ${{inputs.github_path}}
         fetch-depth: 0
+        token: ${{ secrets.gh_pat }}
 
     - name: Configure git
       run: |
