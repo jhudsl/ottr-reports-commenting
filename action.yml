@@ -20,10 +20,8 @@ inputs:
     default: "preview-${{ github.event.pull_request.number }}"
     required: false
     type: string
-secrets:
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
-    default: ${{ secrets.GH_PAT }}
     required: true
     type: string
 
@@ -46,7 +44,7 @@ runs:
       with:
         repository: ${{inputs.github_path}}
         fetch-depth: 0
-        token: ${{ secrets.gh_pat }}
+        token: ${{ inputs.gh_pat }}
 
     - name: Configure git
       run: |
