@@ -19,7 +19,6 @@ inputs:
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
     type: string
-    default: $secrets.GH_PAT
   commit_id:
     description: "The commit id from the pull request this was called from"
     type: string
