@@ -21,13 +21,17 @@ jobs:
           error_min: 3
           gh_pat: ${{ secrets.GH_PAT }}
           commit_id: $GITHUB_SHA
-          
+          git_path: $GITHUB_REPOSITORY
+          branch_name: preview-${{ github.event.pull_request.number }}
+
       - uses: jhudsl/ottr-reports-commenting@main
         with:
           check_type: urls
           error_min: 0
           gh_pat: ${{ secrets.GH_PAT }}
           commit_id: $GITHUB_SHA
+          git_path: $GITHUB_REPOSITORY
+          branch_name: preview-${{ github.event.pull_request.number }}
 
       - uses: jhudsl/ottr-reports-commenting@main
         with:
@@ -35,3 +39,6 @@ jobs:
           error_min: 0
           gh_pat: ${{ secrets.GH_PAT }}
           commit_id: $GITHUB_SHA
+          git_path: $GITHUB_REPOSITORY
+          branch_name: preview-${{ github.event.pull_request.number }}
+          
