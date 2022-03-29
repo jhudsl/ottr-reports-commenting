@@ -11,10 +11,10 @@ inputs:
   git_path:
     description: "What GitHub repository should this be run on?"
     type: string
-    default: $GITHUB_REPOSITORY
+    default: ${{github.action_repository}}
   branch_name:
     description: "What should the preview branch be called?"
-    default: preview-${{ github.event.pull_request.number }}
+    default: ${{preview-github.event.pull_request.number}}
     type: string
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
@@ -22,7 +22,7 @@ inputs:
   commit_id:
     description: "The commit id from the pull request this was called from"
     type: string
-    default: $GITHUB_SHA
+    default: ${{ github.sha }}
 
 outputs:
   comments:
@@ -109,7 +109,7 @@ runs:
       if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
       run: exit 1
       shell: bash
-      
+
     - name: No errors
       if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
       uses: peter-evans/create-or-update-comment@v1
