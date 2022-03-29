@@ -11,10 +11,10 @@ inputs:
   git_path:
     description: "What GitHub repository should this be run on?"
     type: string
-    default: $GITHUB_REPOSITORY
-  branch_name:
+    default: ${{ github.action_repository }}
+  pr_num:
     description: "What should the preview branch be called?"
-    default: preview-${{ github.event.pull_request.number }}
+    default: ${{ github.event.pull_request.number }}
     type: string
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
@@ -22,7 +22,7 @@ inputs:
   commit_id:
     description: "The commit id from the pull request this was called from"
     type: string
-    default: $GITHUB_SHA
+    default: ${{ github.sha }}
 
 outputs:
   comments:
@@ -50,7 +50,7 @@ runs:
         git config --local user.name "jhudsl-robot"
 
         git fetch --all
-        git checkout ${{ inputs.branch_name }} -b
+        git checkout 'preview-${{ inputs.pr_num }}' -b
       shell: bash
 
     - name: Run the check
@@ -66,20 +66,21 @@ runs:
       run: |
         echo ${{ steps.chk_results.outputs.report_path }}
         echo ${{inputs.git_path}}
-        echo ${{ inputs.branch_name }}
         echo $inputs.commit_id
         git add --force ${{ steps.chk_results.outputs.report_path }} || echo "No changes to commit"
         git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
-        git pull --set-upstream origin ${{ inputs.branch_name }} --allow-unrelated-histories --strategy-option=ours
-        git push --force origin ${{ inputs.branch_name }} || echo "No changes to commit"
+        git pull --set-upstream origin 'preview-${{ inputs.pr_num }}' --allow-unrelated-histories --strategy-option=ours
+        git push --force origin 'preview-${{ inputs.pr_num }}' || echo "No changes to commit"
+      shell: bash
 
     - name: Build components of the spell check comment
       id: build-components
       run: |
-        error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/${{ inputs.branch_name }}/${{ steps.chk_results.outputs.report_path }}
+        error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/preview-${{ inputs.pr_num }}/${{ steps.chk_results.outputs.report_path }}
         echo ::set-output name=time::$(date +'%Y-%m-%d')
         echo ::set-output name=commit_id::$inputs.commit_id
         echo ::set-output name=error_url::$error_url
+      shell: bash
 
     # Handle the commenting
     - name: Find Comment
@@ -106,6 +107,8 @@ runs:
     - name: Check check results - fail if too many errors
       if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
       run: exit 1
+      shell: bash
+
 
     - name: No errors
       if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
