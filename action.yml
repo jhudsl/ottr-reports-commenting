@@ -50,7 +50,7 @@ runs:
         git config --local user.name "jhudsl-robot"
 
         git fetch --all
-        git checkout 'preview-${{ inputs.pr_num }}' -b
+        git checkout -b 'preview-${{ inputs.pr_num }}'
       shell: bash
 
     - name: Run the check
