@@ -40,7 +40,7 @@ runs:
     - name: Checkout files
       uses: actions/checkout@v2
       with:
-        repository: ${{inputs.github_path}}
+        repository: ${{inputs.git_path}}
         fetch-depth: 0
         token: ${{ inputs.gh_pat }}
 
