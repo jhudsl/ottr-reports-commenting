@@ -109,7 +109,6 @@ runs:
       run: exit 1
       shell: bash
 
-
     - name: No errors
       if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
       uses: peter-evans/create-or-update-comment@v1
