@@ -14,7 +14,7 @@ inputs:
     default: $GITHUB_REPOSITORY
   branch_name:
     description: "What should the preview branch be called?"
-    default: "preview-${{ github.event.pull_request.number }}"
+    default: preview-${{ github.event.pull_request.number }}
     type: string
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
@@ -66,6 +66,9 @@ runs:
     - name: Commit check errors
       run: |
         echo ${{ steps.chk_results.outputs.report_path }}
+        echo ${{inputs.git_path}}
+        echo ${{ inputs.branch_name }}
+        echo $inputs.commit_id
         git add --force ${{ steps.chk_results.outputs.report_path }} || echo "No changes to commit"
         git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
         git pull --set-upstream origin ${{ inputs.branch_name }} --allow-unrelated-histories --strategy-option=ours
