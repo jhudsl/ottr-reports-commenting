@@ -65,6 +65,7 @@ runs:
 
     - name: Commit check errors
       run: |
+        echo ${{ steps.chk_results.outputs.report_path }}
         git add --force ${{ steps.chk_results.outputs.report_path }} || echo "No changes to commit"
         git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
         git pull --set-upstream origin ${{ inputs.branch_name }} --allow-unrelated-histories --strategy-option=ours
