@@ -72,8 +72,6 @@ runs:
 
       - name: Build components of the spell check comment
         id: build-components
-        env:
-          GH_PAT: ${{ inputs.gh_pat }}
         run: |
           error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/${{ inputs.branch_name }}/${{ steps.chk_results.outputs.report_path }}
           echo ::set-output name=time::$(date +'%Y-%m-%d')
