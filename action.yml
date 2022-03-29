@@ -14,7 +14,7 @@ inputs:
     default: $GITHUB_REPOSITORY
   branch_name:
     description: "What should the preview branch be called?"
-    default: "preview-${{ github.event.pull_request.number }}"
+    default: preview-${{ github.event.pull_request.number }}
     type: string
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
@@ -29,7 +29,6 @@ outputs:
     description: "Comments that have the check report information and links"
   error_name:
     description: "The name of the error that was run"
-    value: ${{ steps.random-number-generator.outputs.random-id }}
   report_path:
     description: "The relative path to where the report was saved."
   error_num:
@@ -41,7 +40,7 @@ runs:
     - name: Checkout files
       uses: actions/checkout@v2
       with:
-        repository: ${{inputs.github_path}}
+        repository: ${{inputs.git_path}}
         fetch-depth: 0
         token: ${{ inputs.gh_pat }}
 
@@ -65,54 +64,56 @@ runs:
 
     - name: Commit check errors
       run: |
+        echo ${{ steps.chk_results.outputs.report_path }}
+        echo ${{inputs.git_path}}
+        echo ${{ inputs.branch_name }}
+        echo $inputs.commit_id
         git add --force ${{ steps.chk_results.outputs.report_path }} || echo "No changes to commit"
         git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
         git pull --set-upstream origin ${{ inputs.branch_name }} --allow-unrelated-histories --strategy-option=ours
         git push --force origin ${{ inputs.branch_name }} || echo "No changes to commit"
 
-      - name: Build components of the spell check comment
-        id: build-components
-        env:
-          GH_PAT: ${{ inputs.gh_pat }}
-        run: |
-          error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/${{ inputs.branch_name }}/${{ steps.chk_results.outputs.report_path }}
-          echo ::set-output name=time::$(date +'%Y-%m-%d')
-          echo ::set-output name=commit_id::$inputs.commit_id
-          echo ::set-output name=error_url::$error_url
+    - name: Build components of the spell check comment
+      id: build-components
+      run: |
+        error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/${{ inputs.branch_name }}/${{ steps.chk_results.outputs.report_path }}
+        echo ::set-output name=time::$(date +'%Y-%m-%d')
+        echo ::set-output name=commit_id::$inputs.commit_id
+        echo ::set-output name=error_url::$error_url
 
-      # Handle the commenting
-      - name: Find Comment
-        uses: peter-evans/find-comment@v1
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: ${{ steps.chk_results.outputs.error_name }}
+    # Handle the commenting
+    - name: Find Comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: ${{ steps.chk_results.outputs.error_name }}
 
-      - name: There are errors!
-        if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
-        uses: peter-evans/create-or-update-comment@v1
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            :warning: ${{ steps.chk_results.outputs.error_name }} :warning:
-            There are ${{ steps.chk_results.outputs.error_name }} that need to be addressed. [Read this guide for more info](https://github.com/jhudsl/OTTR_Template/wiki/Most-common-errors-and-pitfalls#spell-checkurl-checkquiz-format-fail).
-            [Download the errors here.](${{ steps.build-components.outputs.error_url }})
-            _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
-          edit-mode: replace
+    - name: There are errors!
+      if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          :warning: ${{ steps.chk_results.outputs.error_name }} :warning:
+          There are ${{ steps.chk_results.outputs.error_name }} that need to be addressed. [Read this guide for more info](https://github.com/jhudsl/OTTR_Template/wiki/Most-common-errors-and-pitfalls#spell-checkurl-checkquiz-format-fail).
+          [Download the errors here.](${{ steps.build-components.outputs.error_url }})
+          _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
+        edit-mode: replace
 
-      - name: Check check results - fail if too many errors
-        if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
-        run: exit 1
+    - name: Check check results - fail if too many errors
+      if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
+      run: exit 1
 
-      - name: No errors
-        if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
-        uses: peter-evans/create-or-update-comment@v1
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            No ${{ steps.chk_results.outputs.error_name }}! :tada:
-            _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
-          edit-mode: replace
+    - name: No errors
+      if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          No ${{ steps.chk_results.outputs.error_name }}! :tada:
+          _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
+        edit-mode: replace
