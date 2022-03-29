@@ -72,6 +72,7 @@ runs:
         git commit -m 'Add  ${{ steps.chk_results.outputs.error_name }} check file' || echo "No changes to commit"
         git pull --set-upstream origin ${{ inputs.branch_name }} --allow-unrelated-histories --strategy-option=ours
         git push --force origin ${{ inputs.branch_name }} || echo "No changes to commit"
+      shell: bash
 
     - name: Build components of the spell check comment
       id: build-components
@@ -80,6 +81,7 @@ runs:
         echo ::set-output name=time::$(date +'%Y-%m-%d')
         echo ::set-output name=commit_id::$inputs.commit_id
         echo ::set-output name=error_url::$error_url
+      shell: bash
 
     # Handle the commenting
     - name: Find Comment
@@ -106,7 +108,8 @@ runs:
     - name: Check check results - fail if too many errors
       if: ${{ steps.chk_results.outputs.error_num >= inputs.error_min }}
       run: exit 1
-
+      shell: bash
+      
     - name: No errors
       if: ${{ steps.chk_results.outputs.error_num < inputs.error_min }}
       uses: peter-evans/create-or-update-comment@v1
