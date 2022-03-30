@@ -58,7 +58,7 @@ runs:
 
         git fetch --all
         git checkout -b 'preview-${{ inputs.pr_num }}'
-        git push
+        git push --set-upstream origin preview-3
       shell: bash
 
 ############################# Handle commenting ################################
