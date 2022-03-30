@@ -15,19 +15,19 @@ jobs:
         with:
           repository: jhudsl/OTTR_Template
 
-      - uses: jhudsl/ottr-reports-commenting@main
+      - uses: jhudsl/ottr-reports-commenting@cansavvy/troubleshooting
         with:
           check_type: spelling
           error_min: 3
           gh_pat: ${{ secrets.GH_PAT }}
 
-      - uses: jhudsl/ottr-reports-commenting@main
+      - uses: jhudsl/ottr-reports-commenting@cansavvy/troubleshooting
         with:
           check_type: urls
           error_min: 0
           gh_pat: ${{ secrets.GH_PAT }}
 
-      - uses: jhudsl/ottr-reports-commenting@main
+      - uses: jhudsl/ottr-reports-commenting@cansavvy/troubleshooting
         with:
           check_type: quiz_format
           error_min: 0
