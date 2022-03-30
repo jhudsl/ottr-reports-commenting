@@ -44,6 +44,13 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.gh_pat }}
 
+    - name: Run the check
+      uses: jhudsl/ottr-reports@main
+      id: check_results
+      with:
+        check_type: ${{ inputs.check_type }}
+        error_min: ${{ inputs.error_min }}
+
     - name: Configure git
       run: |
         git config --local user.email "itcrtrainingnetwork@gmail.com"
@@ -52,14 +59,7 @@ runs:
         git fetch --all
         git checkout -b 'preview-${{ inputs.pr_num }}'
       shell: bash
-
-    - name: Run the check
-      uses: jhudsl/ottr-reports@main
-      id: check_results
-      with:
-        check_type: ${{ inputs.check_type }}
-        error_min: ${{ inputs.error_min }}
-
+      
 ############################# Handle commenting ################################
 
     - name: Commit check errors
