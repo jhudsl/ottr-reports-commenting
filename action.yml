@@ -51,6 +51,10 @@ runs:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
 
+    - name: Check
+      run: |
+        ls -R
+        
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.check_results.outputs.error_name }}
@@ -61,7 +65,6 @@ runs:
     - name: Build components of the spell check comment
       id: build-components
       run: |
-        error_url=https://raw.githubusercontent.com/${{inputs.git_path}}/${{ env.branch_name }}/${{ steps.check_results.outputs.report_path }}
         echo ::set-output name=time::$(date +'%Y-%m-%d')
         echo ::set-output name=commit_id::$inputs.commit_id
         echo ::set-output name=error_url::$error_url
