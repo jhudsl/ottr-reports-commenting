@@ -51,11 +51,6 @@ runs:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
 
-    - name: Check
-      run: |
-        ls -R
-      shell: bash
-      
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.check_results.outputs.error_name }}
