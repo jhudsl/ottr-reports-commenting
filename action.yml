@@ -54,7 +54,8 @@ runs:
     - name: Declare branch name
       run: |
         echo "branch_name='preview-${{ inputs.pr_num }}'" >> $GITHUB_ENV
-
+      shell: bash
+      
     - name: Make branch if it doesn't exist
       run: |
         git config --local user.email "itcrtrainingnetwork@gmail.com"
