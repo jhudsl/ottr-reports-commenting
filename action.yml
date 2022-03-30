@@ -37,13 +37,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout files
-      uses: actions/checkout@v2
-      with:
-        repository: ${{inputs.git_path}}
-        fetch-depth: 0
-        token: ${{ inputs.gh_pat }}
-
     - name: Run the check
       uses: jhudsl/ottr-reports@main
       id: check_results
