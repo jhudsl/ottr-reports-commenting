@@ -68,7 +68,8 @@ runs:
           git push --set-upstream origin ${{ env.branch_name }}
         else
           echo branch does exist
-          git checkout ${{ env.branch_name }}
+          git fetch --all
+          git checkout $branch_name
           git merge -s recursive --strategy-option=theirs origin/${{ github.head_ref }} --allow-unrelated-histories
         fi
       shell: bash
