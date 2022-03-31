@@ -44,6 +44,11 @@ runs:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
 
+    - name: Check where the file is
+      run: |
+        ls -R
+        cat ${{ steps.check_spelling.outputs.report_path }}
+
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.check_results.outputs.error_name }}
