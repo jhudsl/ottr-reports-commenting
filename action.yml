@@ -40,11 +40,14 @@ runs:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
 
-    - run: |
+    - name: Print it out
+      run: |
         echo ${{ steps.check_results.outputs.report_path }}
         echo ${{ steps.check_results.outputs.error_name }}
         echo ${{ steps.check_results.outputs.chk_results }}
         echo ${{ github.sha }}
+      shell: bash
+
     - uses: actions/upload-artifact@v3
       with:
         name: check-result
