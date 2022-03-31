@@ -48,6 +48,7 @@ runs:
       run: |
         ls -R
         cat ${{ steps.check_spelling.outputs.report_path }}
+      shell: bash
 
     - uses: actions/upload-artifact@v3
       with:
