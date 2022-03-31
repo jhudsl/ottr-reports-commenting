@@ -19,10 +19,6 @@ inputs:
   gh_pat:
     description: "A GitHub secret personal access token that is set in the current repo."
     type: string
-  commit_id:
-    description: "The commit id from the pull request this was called from"
-    type: string
-    default: ${{ github.sha }}
 
 outputs:
   comments:
@@ -44,6 +40,11 @@ runs:
         check_type: ${{ inputs.check_type }}
         error_min: ${{ inputs.error_min }}
 
+    - run: |
+        echo ${{ steps.check_results.outputs.report_path }}
+        echo ${{ steps.check_results.outputs.error_name }}
+        echo ${{ steps.check_results.outputs.chk_results }}
+        echo ${{ github.sha }}
     - uses: actions/upload-artifact@v3
       with:
         name: check-result
@@ -55,7 +56,7 @@ runs:
       id: build-components
       run: |
         echo ::set-output name=time::$(date +'%Y-%m-%d')
-        echo ::set-output name=commit_id::$inputs.commit_id
+        echo ::set-output name=commit_id::${{ github.sha }}
         echo ::set-output name=error_url::$error_url
       shell: bash
 
@@ -68,7 +69,7 @@ runs:
         body-includes: ${{ steps.check_results.outputs.error_name }}
 
     - name: There are errors!
-      if: ${{ steps.check_results.outputs.error_num >= inputs.error_min }}
+      if: ${{ steps.check_results.outputs.chk_results >= inputs.error_min }}
       uses: peter-evans/create-or-update-comment@v1
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
@@ -77,16 +78,16 @@ runs:
           :warning: ${{ steps.check_results.outputs.error_name }} :warning:
           There are ${{ steps.check_results.outputs.error_name }} that need to be addressed. [Read this guide for more info](https://github.com/jhudsl/OTTR_Template/wiki/Most-common-errors-and-pitfalls#spell-checkurl-checkquiz-format-fail).
           [Download the errors here.](${{ steps.build-components.outputs.error_url }})
-          _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
+          _Comment updated at ${{ steps.build-components.outputs.time }} with changes from ${{ github.sha }}_
         edit-mode: replace
 
     - name: Check check results - fail if too many errors
-      if: ${{ steps.check_results.outputs.error_num >= inputs.error_min }}
+      if: ${{ steps.check_results.outputs.chk_results >= inputs.error_min }}
       run: exit 1
       shell: bash
 
     - name: No errors
-      if: ${{ steps.check_results.outputs.error_num < inputs.error_min }}
+      if: ${{ steps.check_results.outputs.chk_results < inputs.error_min }}
       uses: peter-evans/create-or-update-comment@v1
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
